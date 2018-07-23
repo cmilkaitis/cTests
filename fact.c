@@ -2,7 +2,7 @@
 #include <cs50.h>
 #include <string.h>
 
-long long fact(int num)
+long long factorialize(int num)
 {
     if (num < 0)
     {
@@ -14,7 +14,7 @@ long long fact(int num)
     }
     else
     {
-        return num * fact(num - 1);
+        return num * factorialize(num - 1);
     }
 
 }
@@ -31,7 +31,7 @@ int main(int argc, string argv[])
 
     //printf("%i",k);
     int f;
-    f = fact(k);
+    f = factorialize(k);
 
     printf("%i", f);
 
