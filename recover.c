@@ -1,46 +1,59 @@
 #include <stdio.h>
-#include <stdlib.h>
+#include <cs50.h>
+//#include "bmp.h"
 
 int main(int argc, char *argv[])
 {
-    // ensure proper usage
+
     if (argc != 2)
     {
-        fprintf(stderr, "Usage: recover infile\n");
+        fprintf(stderr, "Needs 2 args");
         return 1;
     }
-
-    // save file name
-    char *infile = argv[1];
-
     // open input file
-    FILE *inptr = fopen(infile, "r");
+    FILE *inptr = fopen(argv[1], "r");
     if (inptr == NULL)
     {
-        fprintf(stderr, "Could not open %s.\n", infile);
+        fprintf(stderr, "Could not open file");
         return 2;
     }
 
     int count = 0;
-    for (int i = 0; i < 100000000; i++)
+    unsigned char block[512];
+    FILE *outptr = NULL;
+
+    while (fread(block, 1, 512, inptr) != 0x00)
     {
-        int block[512];
-        fread(block, 1, 512, inptr);
-
-        // if (block[0] == 0xff && block[1] == 0xd8 && block[2] == 0xff)
-        // {
-        //     printf("start");
-        // }
-
-        //printf("%x, %i, %i\n", block[0], block[1], block[2]);
-
-        if (block[0] == -520103681)
+        if (block[0] == 0xff && block[1] == 0xd8 && block[2] == 0xff && (block[3] & 0xf0) == 0xe0)
         {
-            count++;
-            printf("%i:Start\n", count);
-        }
 
+            if (outptr != NULL)
+            {
+                fclose(outptr);
+            }
+
+            char outfile[8];
+            sprintf(outfile, "%03d.jpg", count++);
+            outptr = fopen(outfile, "w");
+
+            if (outptr == NULL)
+            {
+                fclose(inptr);
+                fprintf(stderr, "Could not create %s.\n", outfile);
+                return 3;
+            }
+
+            fwrite(block, 1, 512, outptr);
+
+        }
+        else if (outptr != NULL)
+        {
+            fwrite(block, 1, 512, outptr);
+        }
     }
-    return 1;
+    fclose(inptr);
+    fclose(outptr);
+    return 0;
 }
+
 
